@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
 ####### Configure environment
-
-set -e						# fail fast
+set -e			# fail fast
 set -o pipefail		# don't ignore exit codes when piping output
-# set -x					# enable debugging
+# set -x		# enable debugging
 
 # Configure directories
 BUILD_DIR=$1	# the location of the app
 CACHE_DIR=$2	# a location the buildpack can use to cache build artifacts between builds
-ENV_DIR=$3		# contains a file for each of the application’s configuration variables
+ENV_DIR=$3	# contains a file for each of the application’s configuration variables
 
 BP_DIR=$(cd $(dirname $0); cd ..; pwd)	# buildpack directory
 
@@ -24,7 +23,6 @@ if [ -f "$BUILD_DIR/.apache/.apache.cfg" ]; then
 	source "$BUILD_DIR/.apache/.apache.cfg"
 fi
 
-# Output info about requested version and resolved Apache version
 if [ -z "$APACHE_VERSION" ]; then
 	APACHE_VERSION="2.4.12"
 	info "Defaulting to version $APACHE_VERSION"
@@ -32,7 +30,6 @@ else
 	info "Requested apache version: $APACHE_VERSION"
 fi
 
-# Load config vars into environment; start with defaults
 export_env_dir $ENV_DIR
 
 CACHED_APACHE_VERSION=$(cat $CACHE_DIR/apache/.apache-version 2>/dev/null || true)
@@ -91,13 +88,11 @@ if [ -d "$BUILD_DIR/.apache/conf" ]; then
 	cp -R $BUILD_DIR/.apache/conf/* $BUILD_DIR/apache/etc/apache2
 fi
 
-# build a startup script
 info "Creating startup script..."
 cd "$BUILD_DIR"
 cp "$BP_DIR/bin/boot.sh" .
 chmod +x boot.sh
 
-# Update the PATH
 info "Building runtime environment"
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"/app/apache/bin:/app/apache/sbin:\$PATH\";" > $BUILD_DIR/.profile.d/apache.sh
