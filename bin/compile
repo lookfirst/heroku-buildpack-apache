@@ -19,9 +19,6 @@ source "$BP_DIR/bin/common.sh"
 # Provide hook to deal with errors
 trap build_failed ERR
 
-# Avoid GIT_DIR leak from previous build steps
-unset GIT_DIR
-
 if [ -f "$BUILD_DIR/.apache/.apache.cfg" ]; then
 	info "Found $BUILD_DIR/.apache/.apache.cfg" 
 	source "$BUILD_DIR/.apache/.apache.cfg"
