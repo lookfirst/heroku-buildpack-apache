@@ -59,7 +59,7 @@ if [ "$CACHED_APACHE_VERSION" != "$APACHE_VERSION" ]; then
 	head "Compiling Apache..."
 	head "Configuring"
 	./configure \
-		--prefix=$CACHE_DIR/apache \
+		--prefix=/app/apache \
 		--enable-dav \
 		--enable-dav-lock \
 		--with-included-apr \
@@ -76,7 +76,10 @@ if [ "$CACHED_APACHE_VERSION" != "$APACHE_VERSION" ]; then
 
 	# Save resolved Apache version in the slug for later reference
 	info "Save Apache version..."
-	echo $APACHE_VERSION > $CACHE_DIR/apache/.apache-version
+	echo $APACHE_VERSION > /app/apache/.apache-version
+
+	info "Save Apache installation to cache..."
+	cp -R "/app/apache" "$CACHE_DIR"
 
 	info "Cleaning up Apache source files..."
 	cd ..
@@ -88,7 +91,7 @@ cp -R "$CACHE_DIR/apache" "$BUILD_DIR"
 
 if [ -d "$BUILD_DIR/.apache/conf/" ]; then
 	info "Installing configuration files..."
-	cp -R "$BUILD_DIR/.apache/conf/" "$BUILD_DIR/apache/conf" # first 'conf/' slash is important!
+	cp -R "$BUILD_DIR/.apache/conf/" "$BUILD_DIR/apache/etc/apache2" # first 'conf/' slash is important!
 fi
 
 # build a startup script
@@ -100,4 +103,4 @@ chmod +x boot.sh
 # Update the PATH
 info "Building runtime environment"
 mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\"/app/apache/bin:\$PATH\";" > $BUILD_DIR/.profile.d/apache.sh
+echo "export PATH=\"/app/apache/bin:/app/apache/sbin:\$PATH\";" > $BUILD_DIR/.profile.d/apache.sh
