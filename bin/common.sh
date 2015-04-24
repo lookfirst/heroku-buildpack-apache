@@ -30,10 +30,8 @@ protip() {
 
 build_failed() {
   head "Build failed"
-  echo ""
-  cat $warnings | indent
-  info "We're sorry this build is failing! If you can't find the issue in application code,"
-  info "please open an inssue so we can help: https://github.com/lookfirst/heroku-buildpack-apache/issues"
+  info "We're sorry this build is failing!"
+  info "Please open an issue so we can help: https://github.com/lookfirst/heroku-buildpack-apache/issues"
 }
 
 file_contents() {
