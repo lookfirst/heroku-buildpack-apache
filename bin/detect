@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # bin/detect <build-dir>
 
-if [ -f $1/conf/httpd.conf.erb ]; then
+if [ -d $1/.apache ]; then
   echo "Apache" && exit 0
 else
   echo "no" && exit 1
