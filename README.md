@@ -2,7 +2,7 @@
 
 ## Welcome
 
-Oddly, there isn't a good buildpack just for apache. I looked around and didn't find anything that compiled apache from source code and used the latest version of apache (or let you specify a version).
+Oddly, there isn't a good buildpack just for [apache httpd](http://httpd.apache.org/). I looked around and didn't find anything that compiled apache from source code and used the latest version of apache (or let you specify a version).
 
 I needed a specific build that included support for webdav and I wanted to ensure that the compiled output was cached so that only the first deployment is slow.
 
