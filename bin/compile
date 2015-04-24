@@ -22,8 +22,8 @@ trap build_failed ERR
 # Avoid GIT_DIR leak from previous build steps
 unset GIT_DIR
 
-info "Looking for $BUILD_DIR/.apache/.apache.cfg" 
 if [ -f "$BUILD_DIR/.apache/.apache.cfg" ]; then
+	info "Found $BUILD_DIR/.apache/.apache.cfg" 
 	source "$BUILD_DIR/.apache/.apache.cfg"
 fi
 
@@ -91,7 +91,7 @@ cp -R "$CACHE_DIR/apache" "$BUILD_DIR"
 
 if [ -d "$BUILD_DIR/.apache/conf" ]; then
 	info "Installing configuration files..."
-	cp -R "$BUILD_DIR/.apache/conf/*" "$BUILD_DIR/apache/etc/apache2"
+	cp -R $BUILD_DIR/.apache/conf/* $BUILD_DIR/apache/etc/apache2
 fi
 
 # build a startup script
