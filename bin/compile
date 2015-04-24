@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+
+####### Configure environment
+
+set -e						# fail fast
+set -o pipefail		# don't ignore exit codes when piping output
+# set -x					# enable debugging
+
+# Configure directories
+BUILD_DIR=$1	# the location of the app
+CACHE_DIR=$2	# a location the buildpack can use to cache build artifacts between builds
+ENV_DIR=$3		# contains a file for each of the application’s configuration variables
+
+BP_DIR=$(cd $(dirname $0); cd ..; pwd)	# buildpack directory
+
+# Load some convenience functions like info(), echo(), and indent()
+source "$BP_DIR/bin/common.sh"
+
+# Provide hook to deal with errors
+trap build_failed ERR
+
+# Avoid GIT_DIR leak from previous build steps
+unset GIT_DIR
+
+info "Looking for $BUILD_DIR/.apache/.apache.cfg" 
+if [ -f "$BUILD_DIR/.apache/.apache.cfg" ]; then
+	source "$BUILD_DIR/.apache/.apache.cfg"
+fi
+
+# Output info about requested version and resolved Apache version
+if [ -z "$APACHE_VERSION" ]; then
+	APACHE_VERSION="2.4.12"
+	info "Defaulting to version $APACHE_VERSION"
+else
+	info "Requested apache version: $APACHE_VERSION"
+fi
+
+# Load config vars into environment; start with defaults
+export_env_dir $ENV_DIR
+
+CACHED_APACHE_VERSION=$(cat $CACHE_DIR/apache/.apache-version 2>/dev/null || true)
+if [ "$CACHED_APACHE_VERSION" != "$APACHE_VERSION" ]; then
+	info "Apache version changed since last build; rebuilding."
+	APACHE_SRC_DIR="httpd-$APACHE_VERSION"
+
+	# Purge apache-related cached content, being careful not to purge the top-level
+	# cache, for the sake of heroku-buildpack-multi apps.
+	info "Cleaning cached Apache version..."
+	rm -rf "$CACHE_DIR/apache"
+
+	cd "$BUILD_DIR"
+
+	info "Downloading Apache $APACHE_VERSION..."
+	curl -L http://www.us.apache.org/dist//httpd/httpd-$APACHE_VERSION.tar.gz | tar xz
+	curl -L http://www.us.apache.org/dist//httpd/httpd-$APACHE_VERSION-deps.tar.gz | tar xz
+
+	cd "$APACHE_SRC_DIR"
+
+	head "Compiling Apache..."
+	head "Configuring"
+	./configure \
+		--prefix=$CACHE_DIR/apache \
+		--enable-dav \
+		--enable-dav-lock \
+		--with-included-apr \
+		--enable-layout=GNU \
+		--enable-mods-shared=all \
+		--enable-rewrite \
+		--enable-deflate \
+		--with-mpm=event \
+		2>&1 | indent
+	head "Compiling with Make"
+	make -s -j 9 2>&1 | indent
+	head "Installing with Make"
+	make install -s | indent
+
+	# Save resolved Apache version in the slug for later reference
+	info "Save Apache version..."
+	echo $APACHE_VERSION > $CACHE_DIR/apache/.apache-version
+
+	info "Cleaning up Apache source files..."
+	cd ..
+	rm -rf "$APACHE_SRC_DIR"
+fi
+
+info "Installing Apache $APACHE_VERSION into $BUILD_DIR ..."
+cp -R "$CACHE_DIR/apache" "$BUILD_DIR"
+
+info "Installing configuration files..."
+cp -R "$BUILD_DIR/.apache/conf/" "$BUILD_DIR/apache/conf" # first 'conf/' slash is important!
+
+# build a startup script
+info "Creating startup script..."
+cd "$BUILD_DIR"
+cat >>boot.sh <<EOF
+erb_function() {
+	stripped="${0%.*}"
+	erb $0 > $stripped
+}
+export -f erb_function
+find /app/apache/conf -type f -name "*.erb" | xargs -n 1 bash -c 'erb_function "$@"'
+
+for var in \`env|cut -f1 -d=\`; do
+	echo "PassEnv \$var" >> /app/apache/conf/httpd.conf;
+done
+
+touch /app/apache/logs/error_log
+touch /app/apache/logs/access_log
+tail -F /app/apache/logs/error_log &
+tail -F /app/apache/logs/access_log &
+echo "Launching apache..."
+exec /app/apache/bin/httpd -DNO_DETACH
+EOF
+chmod +x boot.sh
+
+# Update the PATH
+info "Building runtime environment"
+mkdir -p $BUILD_DIR/.profile.d
+echo "export PATH=\"/app/apache/bin:\$PATH\";" > $BUILD_DIR/.profile.d/apache.sh
