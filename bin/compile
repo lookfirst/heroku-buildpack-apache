@@ -83,11 +83,13 @@ if [ "$CACHED_APACHE_VERSION" != "$APACHE_VERSION" ]; then
 	rm -rf "$APACHE_SRC_DIR"
 fi
 
-info "Installing Apache $APACHE_VERSION into $BUILD_DIR ..."
+info "Copying Apache $APACHE_VERSION into $BUILD_DIR ..."
 cp -R "$CACHE_DIR/apache" "$BUILD_DIR"
 
-info "Installing configuration files..."
-cp -R "$BUILD_DIR/.apache/conf/" "$BUILD_DIR/apache/conf" # first 'conf/' slash is important!
+if [ -d "$BUILD_DIR/.apache/conf/" ]; then
+	info "Installing configuration files..."
+	cp -R "$BUILD_DIR/.apache/conf/" "$BUILD_DIR/apache/conf" # first 'conf/' slash is important!
+fi
 
 # build a startup script
 info "Creating startup script..."
