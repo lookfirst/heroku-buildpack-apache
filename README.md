@@ -11,7 +11,7 @@ I needed a specific build that included support for webdav and I wanted to ensur
 1. Create a top level `.apache` folder in your Heroku project.
 1. `heroku buildpack:set https://github.com/lookfirst/heroku-buildpack-apache`
   1. You may want to use this in conjunction with the [buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi).
-1. If you want to specify the version of apache, add a file called .apache.cfg
+1. If you want to specify the version of apache, add a file called `.apache.cfg`
   1. `export APACHE_VERSION=2.4.12`
 1. Put Apache configuration into `.apache/conf`
   1. The contents of this folder is copied over the apache default conf folder in `/app/apache/conf`
