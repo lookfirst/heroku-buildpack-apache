@@ -89,9 +89,9 @@ fi
 info "Copying Apache $APACHE_VERSION into $BUILD_DIR ..."
 cp -R "$CACHE_DIR/apache" "$BUILD_DIR"
 
-if [ -d "$BUILD_DIR/.apache/conf/" ]; then
+if [ -d "$BUILD_DIR/.apache/conf" ]; then
 	info "Installing configuration files..."
-	cp -R "$BUILD_DIR/.apache/conf/" "$BUILD_DIR/apache/etc/apache2" # first 'conf/' slash is important!
+	cp -R "$BUILD_DIR/.apache/conf/*" "$BUILD_DIR/apache/etc/apache2"
 fi
 
 # build a startup script
