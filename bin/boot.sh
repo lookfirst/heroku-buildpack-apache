@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 erb_function() {
 	stripped="${0%.*}"
