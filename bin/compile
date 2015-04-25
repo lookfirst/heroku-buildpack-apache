@@ -23,16 +23,29 @@ fi
 
 if [ -z "$APACHE_VERSION" ]; then
 	APACHE_VERSION="2.4.12"
-	info "Defaulting to version $APACHE_VERSION"
-else
-	info "Requested apache version: $APACHE_VERSION"
 fi
 
+PREFIX_PATH="/app/apache"
+if [ -z "$CONFIGURE_ARGS" ]; then
+	CONFIGURE_ARGS="--prefix=$PREFIX_PATH \
+		--enable-dav \
+		--enable-dav-lock \
+		--with-included-apr \
+		--enable-layout=GNU \
+		--enable-mods-shared=all \
+		--enable-rewrite \
+		--enable-deflate \
+		--with-mpm=event"
+else
+	CONFIGURE_ARGS="--prefix=$PREFIX_PATH $CONFIGURE_ARGS"
+fi
+
+# Load config vars into environment
 export_env_dir $ENV_DIR
 
 CACHED_APACHE_VERSION=$(cat $CACHE_DIR/apache/.apache-version 2>/dev/null || true)
 if [ "$CACHED_APACHE_VERSION" != "$APACHE_VERSION" ]; then
-	info "Apache version changed since last build; rebuilding."
+	info "Apache version changed since last build; old: $CACHED_APACHE_VERSION -> new: $APACHE_VERSION"
 	APACHE_SRC_DIR="httpd-$APACHE_VERSION"
 
 	info "Purge cached Apache..."
@@ -46,30 +59,18 @@ if [ "$CACHED_APACHE_VERSION" != "$APACHE_VERSION" ]; then
 
 	cd "$APACHE_SRC_DIR"
 
-	head "Compiling Apache..."
-	head "Configuring"
-	./configure \
-		--prefix=/app/apache \
-		--enable-dav \
-		--enable-dav-lock \
-		--with-included-apr \
-		--enable-layout=GNU \
-		--enable-mods-shared=all \
-		--enable-rewrite \
-		--enable-deflate \
-		--with-mpm=event \
-		2>&1 | indent
+	head "Configuring Apache with args: $CONFIGURE_ARGS"
+	./configure $CONFIGURE_ARGS 2>&1 | indent
 	head "Compiling with Make"
 	make -s -j 9 2>&1 | indent
 	head "Installing with Make"
 	make install -s | indent
 
-	# Save resolved Apache version in the slug for later reference
-	info "Save Apache version..."
-	echo $APACHE_VERSION > /app/apache/.apache-version
+	info "Saving Apache version file..."
+	echo $APACHE_VERSION > "$PREFIX_PATH/.apache-version"
 
-	info "Save Apache installation to cache..."
-	cp -R "/app/apache" "$CACHE_DIR"
+	info "Saving Apache installation to cache..."
+	cp -R "$PREFIX_PATH" "$CACHE_DIR"
 
 	info "Cleaning up Apache source files..."
 	cd ..
