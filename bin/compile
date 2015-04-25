@@ -2,21 +2,19 @@
 
 ####### Configure environment
 set -e			# fail fast
-set -o pipefail		# don't ignore exit codes when piping output
+set -o pipefail	# don't ignore exit codes when piping output
 # set -x		# enable debugging
 
 # Configure directories
 BUILD_DIR=$1	# the location of the app
 CACHE_DIR=$2	# a location the buildpack can use to cache build artifacts between builds
-ENV_DIR=$3	# contains a file for each of the application’s configuration variables
+ENV_DIR=$3		# contains a file for each of the application’s configuration variables
 
 BP_DIR=$(cd $(dirname $0); cd ..; pwd)	# buildpack directory
 
 # Load some convenience functions like info(), echo(), and indent()
 source "$BP_DIR/bin/common.sh"
-
-# Provide hook to deal with errors
-trap build_failed ERR
+trap build_failed ERR # Provide hook to deal with errors
 
 if [ -f "$BUILD_DIR/.apache/.apache.cfg" ]; then
 	info "Found $BUILD_DIR/.apache/.apache.cfg" 
@@ -37,9 +35,7 @@ if [ "$CACHED_APACHE_VERSION" != "$APACHE_VERSION" ]; then
 	info "Apache version changed since last build; rebuilding."
 	APACHE_SRC_DIR="httpd-$APACHE_VERSION"
 
-	# Purge apache-related cached content, being careful not to purge the top-level
-	# cache, for the sake of heroku-buildpack-multi apps.
-	info "Cleaning cached Apache version..."
+	info "Purge cached Apache..."
 	rm -rf "$CACHE_DIR/apache"
 
 	cd "$BUILD_DIR"
