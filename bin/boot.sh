@@ -9,7 +9,7 @@ echo "Processing erb files..."
 export -f erb_function
 find /app/apache/etc/apache2 -type f -name "*.erb" | xargs -n 1 bash -c 'erb_function "$@"'
 
-for var in `env|cut -f1 -d=`; do
+for var in `env|cut -f1 -s -d=`; do
 	echo "PassEnv $var" >> /app/apache/etc/apache2/httpd.conf;
 done
 
