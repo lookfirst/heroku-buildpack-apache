@@ -17,4 +17,4 @@ I needed a specific build that included support for webdav and I wanted to ensur
   1. `export CONFIGURE_ARGS="--foo-bar"`
 1. Put Apache configuration into the `.apache/conf` folder
   1. The contents of this folder are copied over the apache configuration folder in `/app/apache/etc/apache2`
-  1. Anything with a suffix of `.erb` is processed through `erb` for environment variable replacement
+  1. Anything with a suffix of `.erb` is processed through `erb` for environment variable replacement (`<%= ENV["PORT"] %>`)
