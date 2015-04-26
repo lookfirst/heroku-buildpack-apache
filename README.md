@@ -4,7 +4,7 @@ This is a buildpack for [apache httpd](http://httpd.apache.org/) that enables yo
 
 This buildpack only handles compiling Apache, so you may want to use this in conjunction with  [buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi).
 
-## Instructions
+## Usage
 
 1. `heroku buildpack:set https://github.com/lookfirst/heroku-buildpack-apache`
 1. Create a top level `.apache` folder in your Heroku project
