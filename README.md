@@ -2,19 +2,18 @@
 
 ## Welcome
 
-Oddly, there isn't a good buildpack just for [apache httpd](http://httpd.apache.org/). I looked around and didn't find anything that compiled apache from source code and used the latest version of apache (or let you specify a version).
+This is a buildpack for [apache httpd](http://httpd.apache.org/) that enables you to easily specify the version, compilation arguments and configuration files. The output of the compilation step is cached to speed up future deployments.
 
-I needed a specific build that included support for webdav and I wanted to ensure that the compiled output was cached so that only the first deployment is slow.
+This buildpack only handles compiling Apache, so you may want to use this in conjunction with  [buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi).
 
 ## Instructions
 
-1. Create a top level `.apache` folder in your Heroku project
 1. `heroku buildpack:set https://github.com/lookfirst/heroku-buildpack-apache`
-  1. You may want to use this in conjunction with the [buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi).
-1. If you want to specify the version of apache, add a file called `.apache.cfg` to the `.apache` folder
-  1. `export APACHE_VERSION=2.4.12`
-1. Optionally customize apache compile `configure` arguments by adding `CONFIGURE_ARGS` to the `.apache.cfg` file. Do not specify `--prefix`
-  1. `export CONFIGURE_ARGS="--foo-bar"`
+1. Create a top level `.apache` folder in your Heroku project
+1. Add a file called `.apache.cfg` to the `.apache` folder
+  1. Specify a version: `export APACHE_VERSION=2.4.12`
+  1. Customize apache compile `configure` arguments: `export CONFIGURE_ARGS="--enable-foo"`
+    1. Do not specify `--prefix`
 1. Put Apache configuration into the `.apache/conf` folder
   1. The contents of this folder are copied over the apache configuration folder in `/app/apache/etc/apache2`
   1. Anything with a suffix of `.erb` is processed through `erb` for environment variable replacement (`<%= ENV["PORT"] %>`)
