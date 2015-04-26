@@ -10,10 +10,10 @@ BUILD_DIR=$1	# the location of the app
 CACHE_DIR=$2	# a location the buildpack can use to cache build artifacts between builds
 ENV_DIR=$3		# contains a file for each of the application’s configuration variables
 
-BP_DIR=$(cd $(dirname $0); cd ..; pwd)	# buildpack directory
+BUILDPACK_HOME=$(cd $(dirname $0); cd ..; pwd)	# buildpack directory
 
 # Load some convenience functions like info(), echo(), and indent()
-source "$BP_DIR/bin/common.sh"
+source "$BUILDPACK_HOME/bin/common.sh"
 trap build_failed ERR # Provide hook to deal with errors
 
 if [ -f "$BUILD_DIR/.apache/.apache.cfg" ]; then
@@ -87,7 +87,7 @@ fi
 
 info "Creating startup script..."
 cd "$BUILD_DIR"
-cp "$BP_DIR/bin/boot.sh" .
+cp "$BUILDPACK_HOME/bin/boot.sh" .
 chmod +x boot.sh
 
 info "Building runtime environment"
