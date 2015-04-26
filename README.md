@@ -2,7 +2,7 @@
 
 This is a buildpack for [apache httpd](http://httpd.apache.org/) that enables you to easily specify the version, compilation arguments and configuration files. The output of the compilation step is cached to speed up future deployments.
 
-This buildpack only handles compiling Apache, so you may want to use this in conjunction with  [buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi).
+This buildpack only handles compiling and configuring Apache, so you may want to use this in conjunction with  [buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi).
 
 ## Usage
 
