@@ -85,10 +85,9 @@ if [ -d "$BUILD_DIR/.apache/conf" ]; then
 	cp -R $BUILD_DIR/.apache/conf/* $BUILD_DIR/apache/etc/apache2
 fi
 
-info "Creating startup script..."
-cd "$BUILD_DIR"
-cp "$BUILDPACK_HOME/bin/boot.sh" .
-chmod +x boot.sh
+info "Installing startup script..."
+cp "$BUILDPACK_HOME/bin/boot.sh" $BUILD_DIR
+chmod +x "$BUILD_DIR/boot.sh"
 
 info "Building runtime environment"
 mkdir -p $BUILD_DIR/.profile.d
